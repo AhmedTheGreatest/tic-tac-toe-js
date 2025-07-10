@@ -104,7 +104,7 @@ const Game = (function() {
         Board.resetBoard();
         currentPlayer = player1;
         winner = null;
-    }
+    };
 
     const isGameOver = () => !!winner || checkTie();
 
@@ -116,3 +116,65 @@ const Game = (function() {
         isGameOver
     };
 })();
+
+const DisplayManager = (function() {
+    const cells = document.querySelectorAll('.cell');
+    const restartButton = document.querySelector('#restart');
+    const statusDisplay = document.querySelector('#status');
+    
+    const renderBoard = () => {
+        const board = Board.getBoard();
+        
+        board.forEach((cell, index) => {
+            cells[index].textContent = cell ? cell : '';
+        });
+    };
+
+    const getStatus = () => {
+        if (Game.isGameOver()) {
+            if (Game.getWinner()) {
+                const winner = Game.getWinner()
+                return `${winner.getName()} (${winner.getMarker()}) has WON the game!`;
+            } else {
+                return 'It\'s a tie!';
+            }
+        }
+        
+        const currentPlayer = Game.getCurrentPlayer();
+        return `It's ${currentPlayer.getName()} (${currentPlayer.getMarker()})'s turn`;
+    };
+
+    const updateStatus = () => {
+        const status = getStatus();
+        statusDisplay.textContent = status;
+    }
+
+    const handleClick = (event) => {
+        const index = parseInt(event.target.dataset.index, 10);
+        Game.playRound(index);
+        renderBoard();
+        updateStatus();
+    };
+
+    const restartGame = () => {
+        Game.resetGame();
+        renderBoard();
+        updateStatus();
+    };
+
+    const gameStart = () => {
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleClick);
+        });
+        restartButton.addEventListener('click', restartGame);
+        renderBoard();
+        updateStatus();
+    };
+
+    return {
+        gameStart,
+    }
+})();
+
+
+DisplayManager.gameStart();
